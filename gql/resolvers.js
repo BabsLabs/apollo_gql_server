@@ -6,7 +6,14 @@ const resolvers = {
   Query: {
     
     mushrooms: async () => {
-      return await database('mushrooms').select();
+      const mushrooms = await database('mushrooms').select();
+      mushrooms.map( async (mushroom) => {
+        const locationsOfASingleMushroom = database('locations').whereIn('id',
+          database('mushroom_locations').select('location_id').where('mushroom_id', mushroom.id)
+        )
+        mushroom.locations = locationsOfASingleMushroom
+      })
+      return mushrooms
     },
 
     mushroom: async (parent, args) => {
@@ -19,7 +26,15 @@ const resolvers = {
     },
 
     berries: async () => {
-      return await database('berries').select()
+      const berries =  await database('berries').select()
+
+      berries.map(async (berry) => {
+        const locationsOfASingleBerry = database('locations').whereIn('id',
+          database('berry_locations').select('location_id').where('berry_id', berry.id)
+        )
+        berry.locations = locationsOfASingleBerry
+      })
+      return berries
     },
 
     berry: async (parent, args) => {

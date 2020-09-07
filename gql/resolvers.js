@@ -61,10 +61,16 @@ const resolvers = {
     },
 
     location: async (parent, args) => {
+      const location = await database('locations').where(args).first()
+
       const mushroomsOfASingleLocation = await database('mushrooms').whereIn('id',
       database('mushroom_locations').select('mushroom_id').where('location_id', args.id))
-      const location = await database('locations').where(args).first()
       location.mushrooms = mushroomsOfASingleLocation
+
+      const berriesOfASingleLocation = await database('berries').whereIn('id',
+        database('berry_locations').select('berry_id').where('location_id', args.id))
+      location.berries = berriesOfASingleLocation
+
       return location
     },
 

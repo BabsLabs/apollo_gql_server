@@ -4,23 +4,74 @@ const database = require('knex')(configuration);
 
 const resolvers = {
   Query: {
+    
     mushrooms: async () => {
-      return await database('mushrooms').select();
+      const mushrooms = await database('mushrooms').select();
+      mushrooms.map( async (mushroom) => {
+        const locationsOfASingleMushroom = database('locations').whereIn('id',
+          database('mushroom_locations').select('location_id').where('mushroom_id', mushroom.id))
+        mushroom.locations = locationsOfASingleMushroom
+      })
+      return mushrooms
     },
+
     mushroom: async (parent, args) => {
-      return await database('mushrooms').where(args).first()
+      const mushroom =  await database('mushrooms').where(args).first()
+      const locationsOfASingleMushroom = await database('locations').whereIn('id',
+        database('mushroom_locations').select('location_id').where('mushroom_id', args.id))
+      mushroom.locations = locationsOfASingleMushroom
+      return mushroom
     },
+
     berries: async () => {
-      return await database('berries').select()
+      const berries =  await database('berries').select()
+
+      berries.map(async (berry) => {
+        const locationsOfASingleBerry = database('locations').whereIn('id',
+          database('berry_locations').select('location_id').where('berry_id', berry.id))
+        berry.locations = locationsOfASingleBerry
+      })
+      return berries
     },
+
     berry: async (parent, args) => {
-      return await database('berries').where(args).first()
+      const berry = await database('berries').where(args).first()
+      const locationsOfASingleBerry = await database('locations').whereIn('id',
+        database('berry_locations').select('location_id').where('berry_id', args.id))
+      berry.locations = locationsOfASingleBerry
+      return berry
     },
+
     locations: async () => {
-      return await database('locations').select()
+      const locations = await database('locations').select()
+
+      locations.map((location) => {
+        const mushroomsOfASingleLocation = database('mushrooms').whereIn('id',
+          database('mushroom_locations').select('mushroom_id').where('location_id', location.id))
+      location.mushrooms = mushroomsOfASingleLocation
+      })
+
+      locations.map((location) => {
+        const berriesOfASingleLocation = database('berries').whereIn('id',
+          database('berry_locations').select('berry_id').where('location_id', location.id))
+      location.berries = berriesOfASingleLocation
+      })
+
+      return locations
     },
+
     location: async (parent, args) => {
-      return await database('locations').where(args).first()
+      const location = await database('locations').where(args).first()
+
+      const mushroomsOfASingleLocation = await database('mushrooms').whereIn('id',
+      database('mushroom_locations').select('mushroom_id').where('location_id', args.id))
+      location.mushrooms = mushroomsOfASingleLocation
+
+      const berriesOfASingleLocation = await database('berries').whereIn('id',
+        database('berry_locations').select('berry_id').where('location_id', args.id))
+      location.berries = berriesOfASingleLocation
+
+      return location
     },
 
     authenticationError: (parent, args, context) => {

@@ -8,6 +8,7 @@ const typeDefs = gql`
     scientificName: String!
     poisonous: Boolean!
     edible: Boolean!
+    locations: [Location]
   }
 
    type Berry {
@@ -15,11 +16,14 @@ const typeDefs = gql`
     commonName: String!
     scientificName: String!
     maxDiameterInches: String
+    locations: [Location]
   }
 
   type Location {
     id: ID!
     name: String!
+    mushrooms: [Mushroom]
+    berries: [Berry]
   }
 
   type Query {
